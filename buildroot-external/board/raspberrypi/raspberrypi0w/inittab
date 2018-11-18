@@ -1,0 +1,6 @@
+## insert into /etc/inittab to load the wifi before the networkscripts
+# Load Wifi driver
+::sysinit:/sbin/modprobe brcmfmac
+
+# now run any rc scripts
+::sysinit:/etc/init.d/rcS
