@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -u
 set -e
@@ -13,9 +13,21 @@ do
 
 auto wlan0
 iface wlan0 inet dhcp
-        pre-up wpa_supplicant -B -Dwext -iwlan0 -c/etc/wpa_supplicant.conf
-        post-down killall -q wpa_supplicant
-        wait-delay 15
+		pre-up wpa_supplicant -B -Dwext -iwlan0 -c/etc/wpa_supplicant.conf
+		post-down killall -q wpa_supplicant
+		wait-delay 15
+__EOF__
+		fi
+		if [[ "${WPA_SUPPLICANT_SSID:-}" && "${WPA_SUPPLICANT_PSK:-}" ]]; then
+		cat << __EOF__ > "${TARGET_DIR}/etc/wpa_supplicant.conf"
+ctrl_interface=/var/run/wpa_supplicant
+ap_scan=1
+
+network={
+    ssid=${WPA_SUPPLICANT_SSID}
+    psk=${WPA_SUPPLICANT_PSK}
+    key_mgmt=WPA-PSK
+}
 __EOF__
 		fi
 		;;
@@ -35,6 +47,17 @@ __EOF__
 			sed -i -e 's/ENV{pvolume}:="-20dB"/ENV{pvolume}:="4dB"/g' "${TARGET_DIR}/usr/share/alsa/init/default"
 		fi
 		;;
+		--authorized_keys)
+		if ! [ "${ID_RSA_PUB:-}" = "" ]; then
+			mkdir -p "${TARGET_DIR}/root/.ssh/"
+			chmod 0700 "${TARGET_DIR}/root/.ssh/"
+			chmod 0700 "${TARGET_DIR}/root"
+			echo "${ID_RSA_PUB}" > "${TARGET_DIR}/root/.ssh/authorized_keys"
+			chmod 0600 "${TARGET_DIR}/root/.ssh/authorized_keys"
+		fi
+		;;
 	esac
 
 done
+
+

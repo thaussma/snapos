@@ -4,3 +4,7 @@
 
 # now run any rc scripts
 ::sysinit:/etc/init.d/rcS
+
+
+sed -i '/# now run any rc scripts/::sysinit:/sbin/modprobe brcmfmac' /etc/inittab
+
